@@ -2,7 +2,7 @@
     <div class="box formulario">
         <div class="columns">
             <div 
-                class="column is-8"
+                class="column is-5"
                 role="form"
                 aria-label="Formulário para a criação de uma nova tarefa."
             >
@@ -13,6 +13,22 @@
                     v-model="descricao"
                 >
             </div>
+            <div class="column is-3">
+                <div class="select">
+                    <select v-model="idProjeto">
+                        <option value="">
+                            Selecionar o projeto
+                        </option>
+                        <option 
+                            v-for="projeto in projetos"
+                            :key="projeto.id"
+                            :value="projeto.id"
+                        >
+                            {{ projeto.nome }}
+                        </option>
+                    </select>
+                </div>
+            </div>
             <div class="column">
                 <Temporizador @ao-temporizador-finalizado="finalizarTarefa"/>
             </div>
@@ -21,8 +37,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import Temporizador from '@/components/Temporizador.vue';
+import { useStore } from 'vuex';
+import { key } from '@/store';
 
 export default defineComponent({
     // eslint-disable-next-line
@@ -35,18 +53,27 @@ export default defineComponent({
     },
     data() {
         return {
-            descricao: ''
+            descricao: '',
+            idProjeto: ''
         }
     },
     methods: {
         finalizarTarefa(tempoDecorrido: string): void {
             this.$emit('aoSalvarTarefa', {
                 duracaoEmSegundos: tempoDecorrido,
-                descricao: this.descricao
+                descricao: this.descricao,
+                projeto: this.projetos.find(projeto => projeto.id === this.idProjeto)
             })
             
             this.descricao = ''
         } 
+    },
+    setup() {
+        const store = useStore(key)
+
+        return {
+            projetos: computed(() => store.state.projetos)
+        }
     }
 })
 </script>
