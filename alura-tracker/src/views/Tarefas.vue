@@ -13,22 +13,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import Formulario from '@/components/Formulario.vue';
 import Tarefa from '@/components/Tarefa.vue';
 import ITarefa from '@/interfaces/ITarefa';
 import Box from '@/components/Box.vue';
+import { key } from '@/store';
+import { useStore } from 'vuex';
+import { ADICIONA_TAREFA } from '@/store/tipo-mutacoes';
 
 export default defineComponent({
   name: 'App',
-  data() {
-    return {
-        tarefas: [] as ITarefa[]
-    }
-  },
   methods: {
     salvarTarefa(tarefa: ITarefa): void {
-        this.tarefas.push(tarefa)
+        this.store.commit(ADICIONA_TAREFA, tarefa)
     }
   },
   computed: {
@@ -40,6 +38,14 @@ export default defineComponent({
     Formulario,
     Tarefa,
     Box
+  },
+  setup() {
+    const store = useStore(key)
+
+    return {
+        tarefas: computed(() => store.state.tarefas),
+        store
+    }
   }
 });
 </script>
