@@ -1,9 +1,11 @@
 import IProjeto from "@/interfaces/IProjeto";
 import { createStore, Store, useStore as vuexUseStore } from "vuex";
 import { InjectionKey } from "vue";
-import { ADICIONA_PROJETO, ALTERA_PROJETO, EXCLUIR_PROJETO, ADICIONA_TAREFA, REMOVE_TAREFA, ATUALIZA_TAREFA, NOTIFICAR } from "./tipo-mutacoes";
+import { ADICIONA_PROJETO, ALTERA_PROJETO, EXCLUIR_PROJETO, ADICIONA_TAREFA, REMOVE_TAREFA, ATUALIZA_TAREFA, NOTIFICAR, DEFINIR_PROJETOS, DEFINIR_TAREFAS } from "./tipo-mutacoes";
 import ITarefa from "@/interfaces/ITarefa";
 import { INotificacao } from "@/interfaces/INotificacao";
+import { CADASTRAR_PROJETO, CADASTRAR_TAREFA, OBTER_PROJETOS, OBTER_TAREFAS, REMOVER_PROJETO } from "./tipo-acoes";
+import clienteHttp from "@/http";
 
 interface Estado {
     projetos: IProjeto[],
@@ -35,8 +37,13 @@ export const store = createStore<Estado>({
         [EXCLUIR_PROJETO](state, id: string) {
             state.projetos = state.projetos.filter(proj => proj.id != id)
         },
+        [DEFINIR_PROJETOS](state, projetos: IProjeto[]) {
+            state.projetos = projetos
+        },
+        [DEFINIR_TAREFAS](state, tarefas: ITarefa[]) {
+            state.tarefas = tarefas
+        },
         [ADICIONA_TAREFA](state, tarefa: ITarefa) {
-            tarefa.id = new Date().toISOString()
             state.tarefas.push(tarefa)
         },
         [ATUALIZA_TAREFA](state, tarefa: ITarefa) {
@@ -54,9 +61,45 @@ export const store = createStore<Estado>({
                 state.notificacoes = state.notificacoes.filter(n => n.id !== novaNotificacao.id)
             }, 3000);
         }
+    },
+    actions: {
+        [OBTER_PROJETOS]({ commit }) {
+            clienteHttp 
+                .get('projetos')
+                .then(resposta => commit(DEFINIR_PROJETOS, resposta.data))
+        },
+        [CADASTRAR_PROJETO](contexto, nomeDoProjeto: string) {
+            return clienteHttp.post('/projetos', {
+                nome: nomeDoProjeto
+            })
+        },
+        [ALTERA_PROJETO](contexto, projeto: IProjeto) {
+            return clienteHttp.put(`/projetos/${projeto.id}`, projeto)
+        },
+        [REMOVER_PROJETO]({ commit }, id: string) {
+            return clienteHttp
+                .delete(`/projetos/${id}`)
+                .then(() => commit(EXCLUIR_PROJETO, id))
+        },
+        [OBTER_TAREFAS]({ commit }) {
+            clienteHttp
+                .get('tarefas')
+                .then(resposta => commit(DEFINIR_TAREFAS, resposta.data))
+        },
+        [CADASTRAR_TAREFA]({ commit }, tarefa: ITarefa) {
+            return clienteHttp
+                .post('/tarefas', tarefa)
+                .then(resposta => commit(ADICIONA_TAREFA, resposta.data))
+        }
     }
 })
 
 export function useStore(): Store<Estado> {
     return vuexUseStore(key)
 }
+
+// Notas:
+// Mutations são sempre síncronas.
+// Mutations mudam os estado.
+// Actions podem ser tanto sícronas quanto assícronas.
+// Actions devem chamar (commit) mutations para alteração de estado (boa prática)
