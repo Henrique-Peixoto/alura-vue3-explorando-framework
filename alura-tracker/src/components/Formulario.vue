@@ -39,8 +39,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import Temporizador from '@/components/Temporizador.vue';
-import { useStore } from 'vuex';
-import { key } from '@/store';
+import { useStore } from '@/store';
 import { NOTIFICAR } from '@/store/tipo-mutacoes';
 import { TipoNotificacao } from '@/interfaces/INotificacao';
 
@@ -83,10 +82,10 @@ export default defineComponent({
         } 
     },
     setup() {
-        const store = useStore(key)
+        const store = useStore()
 
         return {
-            projetos: computed(() => store.state.projetos),
+            projetos: computed(() => store.state.projeto.projetos),
             store
         }
     }

@@ -18,8 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { useStore } from 'vuex';
-import { key } from '@/store';
+import { useStore } from '@/store';
 import { TipoNotificacao } from '@/interfaces/INotificacao';
 
 export default defineComponent({
@@ -34,7 +33,7 @@ export default defineComponent({
         }
     },
     setup() {
-        const store = useStore(key)
+        const store = useStore()
 
         return {
             notificacoes: computed(() => store.state.notificacoes)

@@ -41,7 +41,10 @@
                     </div>
                 </section>
                 <footer class="modal-card-foot">
-                    <button class="button is-success">
+                    <button 
+                        class="button is-success"
+                        @click="alterarTarefa"
+                    >
                         Save changes
                     </button>
                     <button 
@@ -61,9 +64,8 @@ import { defineComponent, computed } from 'vue';
 import Formulario from '@/components/Formulario.vue';
 import Tarefa from '@/components/Tarefa.vue';
 import Box from '@/components/Box.vue';
-import { key } from '@/store';
-import { useStore } from 'vuex';
-import { CADASTRAR_TAREFA, OBTER_TAREFAS } from '@/store/tipo-acoes';
+import { useStore } from '@/store';
+import { ALTERAR_TAREFA, CADASTRAR_TAREFA, OBTER_TAREFAS } from '@/store/tipo-acoes';
 import ITarefa from '@/interfaces/ITarefa';
 
 export default defineComponent({
@@ -82,6 +84,10 @@ export default defineComponent({
     },
     fecharModal(): void {
         this.tarefaSelecionada = null
+    },
+    alterarTarefa() {
+        this.store.dispatch(ALTERAR_TAREFA, this.tarefaSelecionada)
+            .then(() => this.fecharModal())
     }
   },
   computed: {
@@ -95,11 +101,11 @@ export default defineComponent({
     Box
   },
   setup() {
-    const store = useStore(key)
+    const store = useStore()
     store.dispatch(OBTER_TAREFAS)
 
     return {
-        tarefas: computed(() => store.state.tarefas),
+        tarefas: computed(() => store.state.tarefa.tarefas),
         store
     }
   }
